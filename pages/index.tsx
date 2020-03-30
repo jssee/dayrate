@@ -1,10 +1,11 @@
 import * as React from "react";
 import { NextPage } from "next";
 
+import BaseInput from "../components/base-input";
 import { targetSalary, workingDays } from "../utils/formulas";
 
 const initialState = {
-  gross: 0,
+  net: 0,
   bonus: 0.01,
   benefits: 0.2,
   sickdays: 7,
@@ -21,7 +22,7 @@ function reducer(state: any, { field, value }: any) {
 
 export default function(): React.ReactElement<NextPage> {
   const [state, dispatch] = React.useReducer(reducer, initialState);
-  const { gross, sickdays, holidays, nonBillableTime, bonus, benefits } = state;
+  const { net, sickdays, holidays, nonBillableTime, bonus, benefits } = state;
 
   const handleChange = (e: any) => {
     dispatch({
@@ -32,13 +33,15 @@ export default function(): React.ReactElement<NextPage> {
 
   return (
     <main>
-      <label htmlFor="gross">
-        Enter your desired gross salary:
+      <BaseInput />
+      <label htmlFor="net">
+        Enter your desired net salary:
         <input
-          id="gross"
-          name="gross"
+          className="dark-input"
+          id="net"
+          name="net"
           type="number"
-          value={gross}
+          value={net}
           onChange={handleChange}
         />
       </label>
@@ -94,14 +97,21 @@ export default function(): React.ReactElement<NextPage> {
       </label>
 
       <h1>
-        Target Salary: {targetSalary(gross, bonus, benefits)}
+        Gross Salary: {targetSalary(net, bonus, benefits)}
         <br />
         Working days: {workingDays(holidays, sickdays, nonBillableTime)}
         <br />
         Day rate:
         {Math.round(
-          targetSalary(gross, bonus, benefits) /
+          targetSalary(net, bonus, benefits) /
             workingDays(holidays, sickdays, nonBillableTime)
+        )}
+        <br />
+        Hourly rate:
+        {Math.round(
+          targetSalary(net, bonus, benefits) /
+            workingDays(holidays, sickdays, nonBillableTime) /
+            8
         )}
       </h1>
     </main>

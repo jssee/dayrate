@@ -1,0 +1,23 @@
+.wrap {
+  height: var(--space-m);
+  display: inline-block;
+  vertical-align: middle;
+  background-color: var(--color-black);
+}
+
+.input {
+  width: 100%;
+  height: var(--space-m);
+  color: var(--color-green);
+  background-color: var(--color-black);
+  border: 1px solid var(--color-purple);
+  font-size: 22px;
+}
+
+.button {
+  position: absolute;
+  width: 40px;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  bottom: var(--space-xs);
+}

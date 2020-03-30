@@ -1,0 +1,14 @@
+.wrapper {
+  display: flex;
+  background-color: var(--color-black);
+  margin-bottom: 1em;
+}
+
+.input {
+  width: 100%;
+  border: 1px solid var(--green);
+  color: var(--color-green);
+  margin: 0;
+  padding-left: 16px;
+  height: 100%;
+}
