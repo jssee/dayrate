@@ -1,27 +1,17 @@
 {
-  "name": "with-typescript",
+  "name": "dayrate",
   "version": "1.0.0",
+  "description": "dayrate app",
+  "main": "index.js",
+  "repository": "git@github.com:jssee/dayrate.git",
+  "author": "Jesse Hoyos <jesse@mojotech.com>",
+  "license": "MIT",
   "scripts": {
-    "dev": "next",
-    "build": "next build",
-    "start": "next start",
-    "type-check": "tsc"
-  },
-  "dependencies": {
-    "isomorphic-unfetch": "3.0.0",
-    "next": "latest",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0"
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html"
   },
   "devDependencies": {
-    "@types/node": "^12.12.21",
-    "@types/react": "^16.9.16",
-    "@types/react-dom": "^16.9.4",
-    "@typescript-eslint/eslint-plugin": "^2.20.0",
-    "@typescript-eslint/parser": "^2.20.0",
-    "eslint": "^6.8.0",
-    "eslint-config-healthier": "^3.2.0",
-    "typescript": "3.7.3"
-  },
-  "license": "ISC"
+    "elm-hot": "^1.1.4",
+    "parcel-bundler": "^1.12.4"
+  }
 }
