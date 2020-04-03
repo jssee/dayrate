@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Basics exposing (..)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -19,23 +20,25 @@ main =
 
 
 type alias Model =
-    { netAmt : String
-    , bonusPct : String
-    , sickdaysAmt : String
-    , benefitsPct : String
-    , holidaysAmt : String
-    , nonBillablePct : String
+    { netAmt : Int
+    , grossAmt : Int
+    , bonusPct : Float
+    , sickdaysAmt : Int
+    , benefitsPct : Float
+    , holidaysAmt : Int
+    , nonBillablePct : Float
     }
 
 
 init : Model
 init =
-    { netAmt = "0"
-    , bonusPct = "0.01"
-    , sickdaysAmt = "7"
-    , benefitsPct = "0.2"
-    , holidaysAmt = "10"
-    , nonBillablePct = "0.2"
+    { netAmt = 0
+    , grossAmt = 0
+    , bonusPct = 0.01
+    , sickdaysAmt = 7
+    , benefitsPct = 0.2
+    , holidaysAmt = 10
+    , nonBillablePct = 0.2
     }
 
 
@@ -44,12 +47,13 @@ init =
 
 
 type Msg
-    = Net String
-    | Bonus String
-    | Sickdays String
-    | Benefits String
-    | Holidays String
-    | Nonbillable String
+    = Net Int
+    | Gross Int
+    | Bonus Float
+    | Sickdays Int
+    | Benefits Float
+    | Holidays Int
+    | Nonbillable Float
 
 
 update : Msg -> Model -> Model
@@ -57,6 +61,9 @@ update msg model =
     case msg of
         Net netAmt ->
             { model | netAmt = netAmt }
+
+        Gross grossAmt ->
+            { model | grossAmt = grossAmt }
 
         Bonus bonusPct ->
             { model | bonusPct = bonusPct }
@@ -75,24 +82,26 @@ update msg model =
 
 
 
+
+salaryFormula g bs bn =
+  ( g * bs ) + ( g * bn ) + g
+
+
+
 -- VIEW
 
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ viewInput "net" "text" "Net" model.netAmt Net
-        , viewInput "bonus" "text" "Bonus" model.bonusPct Bonus
-        , viewInput "sickdays" "text" "Sickdays" model.sickdaysAmt Sickdays
-        , viewInput "benefits" "text" "Benefits" model.benefitsPct Benefits
-        , viewInput "holidays" "text" "Holidays" model.holidaysAmt Holidays
-        , viewInput "non billable time" "text" "nonBillablePct" model.nonBillablePct Nonbillable
+    div
+        []
+        [ div [] [ text ( String.fromInt model.grossAmt ) ]
+        , vInput "net" ( String.fromInt model.netAmt ) Net
         ]
 
-
-viewInput : String -> String -> String -> String -> (String -> msg) -> Html msg
-viewInput l t p v toMsg =
+vInput : String -> String -> ( String -> msg ) -> Html msg
+vInput l v toMsg =
     label [ for l ]
         [ text l
-        , input [ id l, type_ t, placeholder p, value v, onInput toMsg ] []
+        , input [ type_ "text", id l, value v, onInput toMsg ] []
         ]
