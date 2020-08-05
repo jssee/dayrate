@@ -83,6 +83,7 @@ update msg model =
 
 
 
+salaryFormula : Int Int Int -> Int
 salaryFormula g bs bn =
   ( g * bs ) + ( g * bn ) + g
 
