@@ -1,102 +1,48 @@
-import * as React from "react";
 import { NextPage } from "next";
+import { useReducer } from "react";
 
-import BaseInput from "../components/base-input";
 import { targetSalary, workingDays } from "../utils/formulas";
+import Input from "../components/input";
 
-const initialState = {
+export const initialState = {
   net: 0,
   bonus: 0.01,
   benefits: 0.2,
   sickdays: 7,
   holidays: 10,
-  nonBillableTime: 0.2
+  nonBillableTime: 0.2,
 };
 
 function reducer(state: any, { field, value }: any) {
   return {
     ...state,
-    [field]: value
+    [field]: value,
   };
 }
 
-export default function(): React.ReactElement<NextPage> {
-  const [state, dispatch] = React.useReducer(reducer, initialState);
+export default function Home(): React.ReactElement<NextPage> {
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { net, sickdays, holidays, nonBillableTime, bonus, benefits } = state;
 
   const handleChange = (e: any) => {
     dispatch({
       field: e.target.name,
-      value: parseFloat(e.target.value)
+      value: parseFloat(e.target.value),
     });
   };
 
   return (
-    <main>
-      <BaseInput />
-      <label htmlFor="net">
-        Enter your desired net salary:
-        <input
-          className="dark-input"
-          id="net"
-          name="net"
-          type="number"
-          value={net}
-          onChange={handleChange}
-        />
-      </label>
-      <label htmlFor="sickdays">
-        Sickdays:
-        <input
-          id="sickdays"
-          name="sickdays"
-          type="number"
-          value={sickdays}
-          onChange={handleChange}
-        />
-      </label>
-      <label htmlFor="holidays">
-        Holidays:
-        <input
-          id="holidays"
-          name="holidays"
-          type="number"
-          value={holidays}
-          onChange={handleChange}
-        />
-      </label>
-      <label htmlFor="billableDays">
-        Non-billable time:
-        <input
-          id="nonBillableTime"
-          name="nonBillableTime"
-          type="number"
-          value={nonBillableTime}
-          onChange={handleChange}
-        />
-      </label>
-      <label htmlFor="bonus">
-        Bonus amount:
-        <input
-          id="bonus"
-          name="bonus"
-          type="number"
-          value={bonus}
-          onChange={handleChange}
-        />
-      </label>
-      <label htmlFor="benefits">
-        Benefits Cost:
-        <input
-          id="benefits"
-          name="benefits"
-          type="number"
-          value={benefits}
-          onChange={handleChange}
-        />
-      </label>
-
-      <h1>
+    <main className="mx-auto max-w-prose px-4">
+      <div className="mb-8">
+        <h1 className="font-xl font-medium">Suggested Dayrate</h1>
+        <output className="text-3xl font-bold text-green-500">
+          {Math.round(
+            targetSalary(net, bonus, benefits) /
+              workingDays(holidays, sickdays, nonBillableTime)
+          )}
+        </output>
+      </div>
+      <output hidden={true}>
         Gross Salary: {targetSalary(net, bonus, benefits)}
         <br />
         Working days: {workingDays(holidays, sickdays, nonBillableTime)}
@@ -113,7 +59,53 @@ export default function(): React.ReactElement<NextPage> {
             workingDays(holidays, sickdays, nonBillableTime) /
             8
         )}
-      </h1>
+      </output>
+      <div>
+        <form className="space-y-2">
+          <Input
+            value={net}
+            name="net"
+            type="number"
+            label="Desired Net Salary"
+            onChange={handleChange}
+          />
+          <Input
+            value={sickdays}
+            name="sickdays"
+            type="number"
+            label="Sickdays"
+            onChange={handleChange}
+          />
+          <Input
+            value={holidays}
+            name="holidays"
+            type="number"
+            label="Holidays"
+            onChange={handleChange}
+          />
+          <Input
+            value={nonBillableTime}
+            name="nonBillableTime"
+            type="number"
+            label="Non-Billable Time"
+            onChange={handleChange}
+          />
+          <Input
+            value={bonus}
+            name="bonus"
+            type="number"
+            label="Bonus Amount"
+            onChange={handleChange}
+          />
+          <Input
+            value={benefits}
+            name="benefits"
+            type="number"
+            label="Benefits Cost"
+            onChange={handleChange}
+          />
+        </form>
+      </div>
     </main>
   );
 }
