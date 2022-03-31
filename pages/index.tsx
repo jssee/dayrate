@@ -2,16 +2,22 @@ import { NextPage } from "next";
 import { useReducer, useState } from "react";
 import * as Accordion from "@radix-ui/react-accordion";
 
-import { targetSalary, workingDays } from "../utils/formulas";
+import {
+  getDayRate,
+  getMoneyFormat,
+  grossSalary,
+  hourlyRate,
+  getWorkingDays,
+} from "../utils/formulas";
 import Input from "../components/input";
 
 export const initialState = {
   net: 0,
-  bonus: 0.01,
-  benefits: 0.2,
+  bonus: 1,
+  benefits: 20,
   sickdays: 7,
-  holidays: 10,
-  nonBillableTime: 0.2,
+  holidays: 9,
+  nonBillableTime: 20,
 };
 
 function reducer(state: any, { field, value }: any) {
@@ -35,38 +41,20 @@ export default function Home(): React.ReactElement<NextPage> {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    setDayrate(
-      Math.round(
-        targetSalary(net, bonus, benefits) /
-          workingDays(holidays, sickdays, nonBillableTime)
-      )
-    );
+    setDayrate(getDayRate(state));
   };
 
   return (
     <main className="mx-auto max-w-prose px-4">
       <div className="mb-8">
         <h1 className="font-xl font-medium">Suggested Dayrate</h1>
-        <output className="text-3xl font-bold text-green-500">{dayrate}</output>
+        <output className="text-3xl font-bold text-green-500">
+          {getMoneyFormat(dayrate)}
+        </output>
+        <p className="text-sm text-gray-500">
+          that&apos;s about {getMoneyFormat(hourlyRate(state))} an hour.
+        </p>
       </div>
-      <output hidden>
-        Gross Salary: {targetSalary(net, bonus, benefits)}
-        <br />
-        Working days: {workingDays(holidays, sickdays, nonBillableTime)}
-        <br />
-        Day rate:
-        {Math.round(
-          targetSalary(net, bonus, benefits) /
-            workingDays(holidays, sickdays, nonBillableTime)
-        )}
-        <br />
-        Hourly rate:
-        {Math.round(
-          targetSalary(net, bonus, benefits) /
-            workingDays(holidays, sickdays, nonBillableTime) /
-            8
-        )}
-      </output>
       <div>
         <form onSubmit={handleSubmit} className="space-y-2">
           <Input
@@ -80,45 +68,60 @@ export default function Home(): React.ReactElement<NextPage> {
           />
           <Accordion.Root type="single" collapsible={true}>
             <Accordion.Item value="foo">
-              <Accordion.Header className="border h-12 flex items-center">
-                <Accordion.Trigger className="font-bold uppercase text-xs">Edit Formula Values</Accordion.Trigger>
+              <Accordion.Header className="flex h-12 items-center">
+                <Accordion.Trigger className="text-xs font-bold uppercase">
+                  Edit Formula Values
+                </Accordion.Trigger>
               </Accordion.Header>
               <Accordion.Content>
                 <div className="space-y-2">
                   <Input
                     value={sickdays}
                     name="sickdays"
-                    type="number"
+                    type="text"
+                    inputmode="numeric"
+                    pattern="^[0-9]*$"
                     label="Sickdays"
                     onChange={handleChange}
                   />
                   <Input
                     value={holidays}
                     name="holidays"
-                    type="number"
+                    type="text"
+                    inputmode="numeric"
+                    pattern="^[0-9]*$"
                     label="Holidays"
                     onChange={handleChange}
                   />
                   <Input
                     value={nonBillableTime}
                     name="nonBillableTime"
-                    type="number"
+                    type="text"
+                    inputmode="numeric"
+                    pattern="^[0-9]*$"
                     label="Non-Billable Time"
                     onChange={handleChange}
+                    icon="%"
                   />
                   <Input
                     value={bonus}
                     name="bonus"
-                    type="number"
+                    type="text"
+                    inputmode="numeric"
+                    pattern="^[0-9]*$"
                     label="Bonus Amount"
                     onChange={handleChange}
+                    icon="%"
                   />
                   <Input
                     value={benefits}
                     name="benefits"
-                    type="number"
+                    type="text"
+                    inputmode="numeric"
+                    pattern="^[0-9]*$"
                     label="Benefits Cost"
                     onChange={handleChange}
+                    icon="%"
                   />
                 </div>
               </Accordion.Content>
@@ -131,6 +134,45 @@ export default function Home(): React.ReactElement<NextPage> {
             Show me the money
           </button>
         </form>
+      </div>
+      <div>
+        <h2>What is this?</h2>
+        <p>
+          A single purpose calculator for determining a day rate. Hopefully this
+          provides freelancers the confidence to charge what is necesary to
+          reach their monetary goals.
+        </p>
+      </div>
+      <div className="space-y-2">
+        <h2>Why these numbers?</h2>
+        <p>
+          We start with your target salary of {getMoneyFormat(net)} before
+          deductions (tax etc.). Most salaried positions come with some form of
+          benefits (healthcare, pension contributions and more), and we estimate
+          that replacing these would cost about 20% of that salary. Then, most
+          professional salaried employees would hope for a bonus, again, we
+          assume 1%. That leaves us with a target of{" "}
+          {getMoneyFormat(grossSalary(state))} to make.
+        </p>
+        <p>
+          Of the 365 days in a year, 104 are weekends.{" "}
+          <a
+            href="https://www.bls.gov/news.release/ebs.t05.htm"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Professionals in the United States receive 8.5 days of paid holidays
+            on average
+          </a>
+          , we can round that up to 9.
+        </p>
+        <p>
+          The average number of unplanned (sick or otherwise) days worldwide is
+          6.4, but we’ll use 7 to be safe. That gives us{" "}
+          {getMoneyFormat(grossSalary(state))} / {getWorkingDays(state)} days
+          for a day rate of {getMoneyFormat(dayrate)}. You can round that up to
+          the nearest $5 for the sake of sane accounting.
+        </p>
       </div>
     </main>
   );

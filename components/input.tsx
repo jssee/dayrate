@@ -15,15 +15,18 @@ const Input = (props) => (
     "
   >
     <span className="text-xs font-medium">{props.label}</span>
-    <input
-      id={normalizeSpelling(props.label)}
-      name={props.name}
-      className="h-full text-2xl outline-none"
-      onChange={props.onChange}
-      type={props.type}
-      value={props.value}
-      defaultValue={props.defaultValue}
-    />
+    <div className="flex items-center gap-2">
+      {props.icon && <span className="text-gray-400 text-xs">{props.icon}</span>}
+      <input
+        id={normalizeSpelling(props.label)}
+        name={props.name}
+        className="h-full text-2xl outline-none"
+        onChange={props.onChange}
+        type={props.type}
+        value={props.value}
+        defaultValue={props.defaultValue}
+      />
+    </div>
   </label>
 );
 

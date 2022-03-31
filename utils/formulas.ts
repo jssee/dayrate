@@ -25,3 +25,37 @@ export function targetSalary(gross: number, bonus: number, benefits: number) {
 
   return Math.round(TOTAL_AMT);
 }
+
+export const hourlyRate = (vals) =>
+  Math.round(
+    targetSalary(vals.net, getPercent(vals.bonus), getPercent(vals.benefits)) /
+      workingDays(
+        vals.holidays,
+        vals.sickdays,
+        getPercent(vals.nonBillableTime)
+      ) /
+      8
+  );
+
+export const grossSalary = (vals) =>
+  targetSalary(vals.net, getPercent(vals.bonus), getPercent(vals.benefits));
+
+export const getMoneyFormat = (n) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(n);
+};
+
+export const getDayRate = (vals) =>
+  Math.round(
+    targetSalary(vals.net, getPercent(vals.bonus), getPercent(vals.benefits)) /
+      workingDays(
+        vals.holidays,
+        vals.sickdays,
+        getPercent(vals.nonBillableTime)
+      )
+  );
+
+export const getWorkingDays = (vals) =>
+  workingDays(vals.holidays, vals.sickdays, getPercent(vals.nonBillableTime));
