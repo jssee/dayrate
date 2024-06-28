@@ -12,14 +12,16 @@
 
   let dayrate = $state(0);
 
-  function handleInputChange(e: any) {
+  function handleInputChange(
+    e: Event & { currentTarget: EventTarget & HTMLInputElement },
+  ) {
     values = {
       ...values,
-      [e.target.name]: parseFloat(e.target.value) || 0,
+      [e.currentTarget.name]: parseFloat(e.currentTarget.value) || 0,
     };
   }
 
-  function handleSubmit(e: any) {
+  function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
     dayrate = getDayRate(values);
   }
