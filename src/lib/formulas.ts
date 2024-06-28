@@ -7,7 +7,7 @@ export type Values = {
   sickdays: number;
 };
 
-export function getPercent(n: number): number {
+function getPercent(n: number): number {
   return n / 100;
 }
 
