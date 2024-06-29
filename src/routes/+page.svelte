@@ -29,65 +29,30 @@
 
 <main>
   <h1>{getMoneyFormat(dayrate)}</h1>
-
   <form onsubmit={handleSubmit}>
-    <label>
-      desired annual salary:
-      <input
-        onchange={handleInputChange}
-        type="text"
-        name="net"
-        bind:value={values.net}
-      />
-    </label>
-    <label>
-      sick days:
-      <input
-        onchange={handleInputChange}
-        type="text"
-        name="sickdays"
-        bind:value={values.sickdays}
-      />
-    </label>
-    <label>
-      holidays:
-      <input
-        onchange={handleInputChange}
-        type="text"
-        name="holidays"
-        bind:value={values.holidays}
-      />
-    </label>
-    <label>
-      time not working:
-      <input
-        onchange={handleInputChange}
-        type="text"
-        name="nonBillableTime"
-        bind:value={values.nonBillableTime}
-      />
-    </label>
-    <label>
-      bonus amount:
-      <input
-        type="text"
-        onchange={handleInputChange}
-        name="bonus"
-        bind:value={values.bonus}
-      />
-    </label>
-    <label>
-      benefits:
-      <input
-        type="text"
-        name="benefits"
-        onchange={handleInputChange}
-        bind:value={values.benefits}
-      />
-    </label>
+    {#each Object.entries(values) as [name, _]}
+      {@render field({ name })}
+    {/each}
     <button type="submit">Calculate</button>
   </form>
 </main>
+
+{#snippet field({ name })}
+  <label>
+    {name
+      .replace(/([A-Z])/g, " $1")
+      .replace(/^./, (first: string) => first.toUpperCase())}
+    <input
+      onfocusin={({ currentTarget }) => currentTarget.select()}
+      onchange={handleInputChange}
+      type="text"
+      inputmode="numeric"
+      pattern="^[0-9]*$"
+      bind:value={values[name]}
+      {name}
+    />
+  </label>
+{/snippet}
 
 <style>
   main {
