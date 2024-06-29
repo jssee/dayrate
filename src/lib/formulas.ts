@@ -2,7 +2,7 @@ export type Values = {
   benefits: number;
   bonus: number;
   holidays: number;
-  net: number;
+  desiredAnnualSalary: number;
   nonBillableTime: number;
   sickdays: number;
 };
@@ -41,7 +41,11 @@ export function targetSalary(
 
 export const hourlyRate = (vals: Values) =>
   Math.round(
-    targetSalary(vals.net, getPercent(vals.bonus), getPercent(vals.benefits)) /
+    targetSalary(
+      vals.desiredAnnualSalary,
+      getPercent(vals.bonus),
+      getPercent(vals.benefits),
+    ) /
       workingDays(
         vals.holidays,
         vals.sickdays,
@@ -51,7 +55,11 @@ export const hourlyRate = (vals: Values) =>
   );
 
 export const grossSalary = (vals: Values) =>
-  targetSalary(vals.net, getPercent(vals.bonus), getPercent(vals.benefits));
+  targetSalary(
+    vals.desiredAnnualSalary,
+    getPercent(vals.bonus),
+    getPercent(vals.benefits),
+  );
 
 export const getMoneyFormat = (n: number) => {
   return new Intl.NumberFormat("en-US", {
@@ -62,7 +70,11 @@ export const getMoneyFormat = (n: number) => {
 
 export const getDayRate = (vals: Values) =>
   Math.round(
-    targetSalary(vals.net, getPercent(vals.bonus), getPercent(vals.benefits)) /
+    targetSalary(
+      vals.desiredAnnualSalary,
+      getPercent(vals.bonus),
+      getPercent(vals.benefits),
+    ) /
       workingDays(
         vals.holidays,
         vals.sickdays,

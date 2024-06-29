@@ -2,7 +2,7 @@
   import { getDayRate, getMoneyFormat, type Values } from "$lib/formulas";
 
   let values = $state<Values>({
-    net: 0,
+    desiredAnnualSalary: 0,
     bonus: 1,
     benefits: 20,
     sickdays: 7,
