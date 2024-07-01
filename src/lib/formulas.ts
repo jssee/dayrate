@@ -1,11 +1,20 @@
-export function getPercent(n: number): number {
+export type Values = {
+  benefits: number;
+  bonus: number;
+  holidays: number;
+  desiredAnnualSalary: number;
+  nonBillableTime: number;
+  sickdays: number;
+};
+
+function getPercent(n: number): number {
   return n / 100;
 }
 
 export function workingDays(
   holidays: number,
   sickdays: number,
-  nonBillableTime: number
+  nonBillableTime: number,
 ): number {
   const DAYS = 365;
   const WEEKENDS = 104;
@@ -15,7 +24,11 @@ export function workingDays(
   return Math.round(BILLABLE_DAYS - BILLABLE_DAYS * nonBillableTime);
 }
 
-export function targetSalary(gross: number, bonus: number, benefits: number) {
+export function targetSalary(
+  gross: number,
+  bonus: number,
+  benefits: number,
+): number {
   // The average annual bonus is about 1% of your salary
   const BONUS_AMT: number = gross * bonus;
   // The average cost to cover benefits that a typical employer would cover, like health insurance, is 20%
@@ -26,36 +39,48 @@ export function targetSalary(gross: number, bonus: number, benefits: number) {
   return Math.round(TOTAL_AMT);
 }
 
-export const hourlyRate = (vals) =>
+export const hourlyRate = (vals: Values) =>
   Math.round(
-    targetSalary(vals.net, getPercent(vals.bonus), getPercent(vals.benefits)) /
+    targetSalary(
+      vals.desiredAnnualSalary,
+      getPercent(vals.bonus),
+      getPercent(vals.benefits),
+    ) /
       workingDays(
         vals.holidays,
         vals.sickdays,
-        getPercent(vals.nonBillableTime)
+        getPercent(vals.nonBillableTime),
       ) /
-      8
+      8,
   );
 
-export const grossSalary = (vals) =>
-  targetSalary(vals.net, getPercent(vals.bonus), getPercent(vals.benefits));
+export const grossSalary = (vals: Values) =>
+  targetSalary(
+    vals.desiredAnnualSalary,
+    getPercent(vals.bonus),
+    getPercent(vals.benefits),
+  );
 
-export const getMoneyFormat = (n) => {
+export const getMoneyFormat = (n: number) => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(n);
 };
 
-export const getDayRate = (vals) =>
+export const getDayRate = (vals: Values) =>
   Math.round(
-    targetSalary(vals.net, getPercent(vals.bonus), getPercent(vals.benefits)) /
+    targetSalary(
+      vals.desiredAnnualSalary,
+      getPercent(vals.bonus),
+      getPercent(vals.benefits),
+    ) /
       workingDays(
         vals.holidays,
         vals.sickdays,
-        getPercent(vals.nonBillableTime)
-      )
+        getPercent(vals.nonBillableTime),
+      ),
   );
 
-export const getWorkingDays = (vals) =>
+export const getWorkingDays = (vals: Values) =>
   workingDays(vals.holidays, vals.sickdays, getPercent(vals.nonBillableTime));
