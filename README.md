@@ -1,62 +1,44 @@
-# TypeScript Next.js example
+# Day-rate formula
 
-This is a really simple project that shows the usage of Next.js with TypeScript.
+The calculator estimates the day rate needed to reach a desired annual salary after accounting for bonus, benefits, time off, and non-billable work. It assumes 365 days per year, 104 weekend days, and eight billable hours per day. Intermediate values retain their full precision, while the final day rate is rounded up to a practical quoting increment.
 
-## Deploy your own
+## Terms
 
-Deploy the example using [ZEIT Now](https://zeit.co/now):
+| Symbol | Meaning |
+| --- | --- |
+| $S$ | Desired annual salary before personal taxes |
+| $b$ | Bonus percentage as a decimal |
+| $e$ | Benefits percentage as a decimal |
+| $H$ | Holidays per year |
+| $K$ | Sick or contingency days per year |
+| $u$ | Non-billable time as a decimal |
+| $C$ | Annual compensation target |
+| $D$ | Estimated billable days per year |
+| $r_{raw}$ | Unrounded day rate |
+| $q$ | Quoting increment |
+| $r$ | Quoted day rate |
+| $r_h$ | Equivalent hourly rate |
 
-[![Deploy with ZEIT Now](https://zeit.co/button)](https://zeit.co/new/project?template=https://github.com/zeit/next.js/tree/canary/examples/with-typescript)
+## Formula
 
-## How to use it?
+$$
+C=S(1+b+e)
+$$
 
-### Using `create-next-app`
+$$
+D=(365-104-H-K)(1-u)
+$$
 
-Execute [`create-next-app`](https://github.com/zeit/next.js/tree/canary/packages/create-next-app) with [npm](https://docs.npmjs.com/cli/init) or [Yarn](https://yarnpkg.com/lang/en/docs/cli/create/) to bootstrap the example:
+$$
+r_{raw}=\frac{C}{D}
+$$
 
-```bash
-npm init next-app --example with-typescript with-typescript-app
-# or
-yarn create next-app --example with-typescript with-typescript-app
-```
+$$
+r=q\left\lceil\frac{r_{raw}}{q}\right\rceil
+$$
 
-### Download manually
+For a five-dollar quoting increment, $q=5$. The equivalent hourly rate is:
 
-Download the example:
-
-```bash
-curl https://codeload.github.com/zeit/next.js/tar.gz/canary | tar -xz --strip=2 next.js-canary/examples/with-typescript
-cd with-typescript
-```
-
-Install it and run:
-
-```bash
-npm install
-npm run dev
-# or
-yarn
-yarn dev
-```
-
-Deploy it to the cloud with [ZEIT Now](https://zeit.co/new?filter=next.js&utm_source=github&utm_medium=readme&utm_campaign=next-example) ([Documentation](https://nextjs.org/docs/deployment)).
-
-## Notes
-
-This example shows how to integrate the TypeScript type system into Next.js. Since TypeScript is supported out of the box with Next.js, all we have to do is to install TypeScript.
-
-```
-npm install --save-dev typescript
-```
-
-To enable TypeScript's features, we install the type declaratons for React and Node.
-
-```
-npm install --save-dev @types/react @types/react-dom @types/node
-```
-
-When we run `next dev` the next time, Next.js will start looking for any `.ts` or `.tsx` files in our project and builds it. It even automatically creates a `tsconfig.json` file for our project with the recommended settings.
-
-Next.js has built-in TypeScript declarations, so we'll get autocompletion for Next.js' modules straight away.
-
-A `type-check` script is also added to `package.json`, which runs TypeScript's `tsc` CLI in `noEmit` mode to run type-checking separately. You can then include this, for example, in your `test` scripts.
+$$
+r_h=\frac{r}{8}
+$$
