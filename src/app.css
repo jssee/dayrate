@@ -1,0 +1,289 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #20201e;
+  background: #ffffff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+main {
+  width: min(100% - 40px, 720px);
+  margin: 0 auto;
+  padding: 64px 0 96px;
+}
+
+header {
+  margin-bottom: 56px;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 12px;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+h2 {
+  margin-bottom: 20px;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+header p,
+.breakdown > p {
+  max-width: 580px;
+  color: #62625e;
+  line-height: 1.6;
+}
+
+.calculator {
+  border-top: 1px solid #d9d9d4;
+  padding-top: 24px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+label small,
+summary small {
+  color: #6f6f6a;
+  font-size: 0.8125rem;
+  font-weight: 400;
+}
+
+input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  color: #20201e;
+  background: transparent;
+}
+
+input:focus-visible {
+  outline: 2px solid #2457d6;
+  outline-offset: 4px;
+}
+
+.primary-field {
+  margin: 32px 0 40px;
+}
+
+.money-input,
+.suffix-input {
+  display: flex;
+  align-items: baseline;
+  border-bottom: 1px solid #8c8c86;
+}
+
+.money-input {
+  gap: 10px;
+  padding: 8px 0 10px;
+  font-size: 1.75rem;
+}
+
+.money-input input {
+  font-size: inherit;
+  font-weight: 600;
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-top: 1px solid #d9d9d4;
+  border-bottom: 1px solid #d9d9d4;
+  padding: 32px 0;
+}
+
+.result h2 {
+  margin-bottom: 8px;
+  color: #62625e;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.result output {
+  display: block;
+  font-size: 1.125rem;
+}
+
+.result output strong {
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.result output span {
+  margin-left: 0.35rem;
+}
+
+.result p {
+  margin: 10px 0 0;
+  color: #62625e;
+  font-size: 0.875rem;
+}
+
+.secondary-button {
+  flex: 0 0 auto;
+  border: 1px solid #8c8c86;
+  border-radius: 3px;
+  padding: 9px 14px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.secondary-button:hover {
+  border-color: #20201e;
+}
+
+.secondary-button:focus-visible,
+.text-button:focus-visible,
+summary:focus-visible {
+  outline: 2px solid #2457d6;
+  outline-offset: 3px;
+}
+
+details {
+  border-bottom: 1px solid #d9d9d4;
+}
+
+summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 0;
+  cursor: pointer;
+  font-weight: 600;
+  list-style-position: inside;
+}
+
+summary::marker {
+  font-size: 0.75rem;
+}
+
+.assumptions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 32px;
+  padding: 12px 0 28px;
+}
+
+.suffix-input {
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.suffix-input > span {
+  flex: 0 0 auto;
+  color: #62625e;
+  font-size: 0.8125rem;
+}
+
+.text-button {
+  margin-bottom: 24px;
+  border: 0;
+  padding: 0;
+  color: #52524e;
+  background: transparent;
+  font-size: 0.8125rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.breakdown {
+  padding-top: 56px;
+}
+
+.breakdown > h2 {
+  margin-bottom: 8px;
+  font-size: 1.25rem;
+}
+
+dl {
+  margin: 32px 0 0;
+  border-top: 1px solid #d9d9d4;
+}
+
+dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid #d9d9d4;
+  padding: 16px 0;
+}
+
+dt {
+  color: #62625e;
+}
+
+dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.note {
+  margin-top: 16px;
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 560px) {
+  main {
+    width: min(100% - 32px, 720px);
+    padding: 40px 0 64px;
+  }
+
+  header {
+    margin-bottom: 40px;
+  }
+
+  .result {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  summary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .assumptions {
+    grid-template-columns: 1fr;
+  }
+}
