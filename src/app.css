@@ -1,7 +1,52 @@
 :root {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: #20201e;
-  background: #ffffff;
+  --color-background: #ffffff;
+  --color-text: #20201e;
+  --color-muted: #62625e;
+  --color-border: #d9d9d4;
+  --color-border-strong: #8c8c86;
+  --color-focus: #2457d6;
+
+  --font-family-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.8125rem;
+  --font-size-md: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-input: 1.75rem;
+  --font-size-title: clamp(2rem, 5vw, 2.75rem);
+  --font-size-result: clamp(2.5rem, 8vw, 4rem);
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+  --line-height-tight: 1;
+  --line-height-heading: 1.4;
+  --line-height-body: 1.6;
+  --letter-spacing-title: -0.04em;
+  --letter-spacing-result: -0.05em;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-14: 3.5rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+
+  --content-width: 45rem;
+  --text-width: 36.25rem;
+  --control-radius: 0.1875rem;
+  --border-default: 1px solid var(--color-border);
+  --border-strong: 1px solid var(--color-border-strong);
+  --focus-outline: 2px solid var(--color-focus);
+
+  font-family: var(--font-family-sans);
+  color: var(--color-text);
+  background: var(--color-background);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 }
@@ -12,7 +57,7 @@
 
 body {
   margin: 0;
-  min-width: 320px;
+  min-width: 20rem;
 }
 
 button,
@@ -25,13 +70,13 @@ button {
 }
 
 main {
-  width: min(100% - 40px, 720px);
+  width: min(calc(100% - var(--space-10)), var(--content-width));
   margin: 0 auto;
-  padding: 64px 0 96px;
+  padding: var(--space-16) 0 var(--space-24);
 }
 
 header {
-  margin-bottom: 56px;
+  margin-bottom: var(--space-14);
 }
 
 h1,
@@ -41,43 +86,43 @@ p {
 }
 
 h1 {
-  margin-bottom: 12px;
-  font-size: clamp(2rem, 5vw, 2.75rem);
-  line-height: 1;
-  letter-spacing: -0.04em;
+  margin-bottom: var(--space-3);
+  font-size: var(--font-size-title);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-title);
 }
 
 h2 {
-  margin-bottom: 20px;
-  font-size: 1rem;
-  line-height: 1.4;
+  margin-bottom: var(--space-5);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-heading);
 }
 
 header p,
 .breakdown > p {
-  max-width: 580px;
-  color: #62625e;
-  line-height: 1.6;
+  max-width: var(--text-width);
+  color: var(--color-muted);
+  line-height: var(--line-height-body);
 }
 
 .calculator {
-  border-top: 1px solid #d9d9d4;
-  padding-top: 24px;
+  border-top: var(--border-default);
+  padding-top: var(--space-6);
 }
 
 label {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
+  gap: var(--space-2);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
 }
 
 label small,
 summary small {
-  color: #6f6f6a;
-  font-size: 0.8125rem;
-  font-weight: 400;
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-normal);
 }
 
 input {
@@ -85,191 +130,191 @@ input {
   min-width: 0;
   border: 0;
   outline: 0;
-  color: #20201e;
+  color: var(--color-text);
   background: transparent;
 }
 
 input:focus-visible {
-  outline: 2px solid #2457d6;
-  outline-offset: 4px;
+  outline: var(--focus-outline);
+  outline-offset: var(--space-1);
 }
 
 .primary-field {
-  margin: 32px 0 40px;
+  margin: var(--space-8) 0 var(--space-10);
 }
 
 .money-input,
 .suffix-input {
   display: flex;
   align-items: baseline;
-  border-bottom: 1px solid #8c8c86;
+  border-bottom: var(--border-strong);
 }
 
 .money-input {
-  gap: 10px;
-  padding: 8px 0 10px;
-  font-size: 1.75rem;
+  gap: var(--space-2);
+  padding: var(--space-2) 0 var(--space-3);
+  font-size: var(--font-size-input);
 }
 
 .money-input input {
   font-size: inherit;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .result {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  border-top: 1px solid #d9d9d4;
-  border-bottom: 1px solid #d9d9d4;
-  padding: 32px 0;
+  gap: var(--space-6);
+  border-top: var(--border-default);
+  border-bottom: var(--border-default);
+  padding: var(--space-8) 0;
 }
 
 .result h2 {
-  margin-bottom: 8px;
-  color: #62625e;
-  font-size: 0.875rem;
-  font-weight: 600;
+  margin-bottom: var(--space-2);
+  color: var(--color-muted);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
 }
 
 .result output {
   display: block;
-  font-size: 1.125rem;
+  font-size: var(--font-size-lg);
 }
 
 .result output strong {
-  font-size: clamp(2.5rem, 8vw, 4rem);
-  line-height: 1;
-  letter-spacing: -0.05em;
+  font-size: var(--font-size-result);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-result);
 }
 
 .result output span {
-  margin-left: 0.35rem;
+  margin-left: var(--space-1);
 }
 
 .result p {
-  margin: 10px 0 0;
-  color: #62625e;
-  font-size: 0.875rem;
+  margin: var(--space-3) 0 0;
+  color: var(--color-muted);
+  font-size: var(--font-size-md);
 }
 
 .secondary-button {
   flex: 0 0 auto;
-  border: 1px solid #8c8c86;
-  border-radius: 3px;
-  padding: 9px 14px;
+  border: var(--border-strong);
+  border-radius: var(--control-radius);
+  padding: var(--space-2) var(--space-3);
   background: transparent;
   cursor: pointer;
 }
 
 .secondary-button:hover {
-  border-color: #20201e;
+  border-color: var(--color-text);
 }
 
 .secondary-button:focus-visible,
 .text-button:focus-visible,
 summary:focus-visible {
-  outline: 2px solid #2457d6;
-  outline-offset: 3px;
+  outline: var(--focus-outline);
+  outline-offset: var(--space-1);
 }
 
 details {
-  border-bottom: 1px solid #d9d9d4;
+  border-bottom: var(--border-default);
 }
 
 summary {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 24px;
-  padding: 22px 0;
+  gap: var(--space-6);
+  padding: var(--space-6) 0;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   list-style-position: inside;
 }
 
 summary::marker {
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 .assumptions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 28px 32px;
-  padding: 12px 0 28px;
+  gap: var(--space-8);
+  padding: var(--space-3) 0 var(--space-8);
 }
 
 .suffix-input {
-  gap: 8px;
-  padding: 8px 0;
-  font-size: 1rem;
-  font-weight: 400;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
 }
 
 .suffix-input > span {
   flex: 0 0 auto;
-  color: #62625e;
-  font-size: 0.8125rem;
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
 }
 
 .text-button {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
   border: 0;
   padding: 0;
-  color: #52524e;
+  color: var(--color-muted);
   background: transparent;
-  font-size: 0.8125rem;
+  font-size: var(--font-size-sm);
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-underline-offset: var(--space-1);
   cursor: pointer;
 }
 
 .breakdown {
-  padding-top: 56px;
+  padding-top: var(--space-14);
 }
 
 .breakdown > h2 {
-  margin-bottom: 8px;
-  font-size: 1.25rem;
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-xl);
 }
 
 dl {
-  margin: 32px 0 0;
-  border-top: 1px solid #d9d9d4;
+  margin: var(--space-8) 0 0;
+  border-top: var(--border-default);
 }
 
 dl div {
   display: flex;
   justify-content: space-between;
-  gap: 24px;
-  border-bottom: 1px solid #d9d9d4;
-  padding: 16px 0;
+  gap: var(--space-6);
+  border-bottom: var(--border-default);
+  padding: var(--space-4) 0;
 }
 
 dt {
-  color: #62625e;
+  color: var(--color-muted);
 }
 
 dd {
   margin: 0;
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .note {
-  margin-top: 16px;
-  font-size: 0.8125rem;
+  margin-top: var(--space-4);
+  font-size: var(--font-size-sm);
 }
 
-@media (max-width: 560px) {
+@media (max-width: 35rem) {
   main {
-    width: min(100% - 32px, 720px);
-    padding: 40px 0 64px;
+    width: min(calc(100% - var(--space-8)), var(--content-width));
+    padding: var(--space-10) 0 var(--space-16);
   }
 
   header {
-    margin-bottom: 40px;
+    margin-bottom: var(--space-10);
   }
 
   .result {
@@ -280,7 +325,7 @@ dd {
   summary {
     align-items: flex-start;
     flex-direction: column;
-    gap: 4px;
+    gap: var(--space-1);
   }
 
   .assumptions {
