@@ -1,6 +1,7 @@
 import {
   CALCULATOR_VALUE_NAMES,
   DEFAULT_CALCULATOR_VALUES,
+  normalizeCalculatorValues,
   validateCalculatorValues,
 } from './calculator-values.js'
 
@@ -8,6 +9,14 @@ export { DEFAULT_CALCULATOR_VALUES } from './calculator-values.js'
 
 /**
  * @typedef {typeof DEFAULT_CALCULATOR_VALUES} CalculatorValues
+ */
+
+/**
+ * @typedef {object} CalculatorBrowser
+ * @property {{ href: string }} location
+ * @property {{ state: unknown, replaceState: (state: unknown, unused: string, url?: string | URL | null) => void }} history
+ * @property {(type: 'popstate', listener: () => void) => void} addEventListener
+ * @property {(type: 'popstate', listener: () => void) => void} removeEventListener
  */
 
 /**
@@ -25,7 +34,7 @@ function parseValue(name, value) {
 
 export class CalculatorUrlState {
   /**
-   * @param {Window} [browser=window]
+   * @param {CalculatorBrowser} [browser=window]
    */
   constructor(browser = window) {
     this.browser = browser
@@ -40,16 +49,7 @@ export class CalculatorUrlState {
       if (params.has(name)) values[name] = parseValue(name, params.get(name) ?? undefined)
     }
 
-    for (const _name of CALCULATOR_VALUE_NAMES) {
-      const errors = validateCalculatorValues(values)
-      if (Object.keys(errors).length === 0) break
-
-      for (const name of CALCULATOR_VALUE_NAMES) {
-        if (errors[name]) values[name] = DEFAULT_CALCULATOR_VALUES[name]
-      }
-    }
-
-    return values
+    return normalizeCalculatorValues(values)
   }
 
   /**

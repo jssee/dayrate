@@ -1,5 +1,6 @@
 const DAYS_PER_YEAR = 365
 const WEEKEND_DAYS_PER_YEAR = 104
+export const WORKING_DAYS_PER_YEAR = DAYS_PER_YEAR - WEEKEND_DAYS_PER_YEAR
 const HOURS_PER_DAY = 8
 
 /**
@@ -19,7 +20,7 @@ export function calculateAnnualCompensation(salary, bonusRate, benefitsRate) {
  * @returns {number}
  */
 export function calculateBillableDays(holidays, sickDays, nonBillableRate) {
-  return (DAYS_PER_YEAR - WEEKEND_DAYS_PER_YEAR - holidays - sickDays) * (1 - nonBillableRate)
+  return (WORKING_DAYS_PER_YEAR - holidays - sickDays) * (1 - nonBillableRate)
 }
 
 /**

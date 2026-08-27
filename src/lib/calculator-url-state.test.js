@@ -3,9 +3,15 @@ import test from 'node:test'
 
 import { CalculatorUrlState, DEFAULT_CALCULATOR_VALUES } from './calculator-url-state.js'
 
+/** @typedef {import('./calculator-url-state.js').CalculatorBrowser} CalculatorBrowser */
+
+/**
+ * @param {string} href
+ * @returns {CalculatorBrowser & { popstate: () => void }}
+ */
 function createBrowser(href) {
-  const listeners = new Set()
-  const browser = {
+  const listeners = /** @type {Set<() => void>} */ (new Set())
+  const browser = /** @type {CalculatorBrowser & { popstate: () => void }} */ ({
     location: { href },
     history: {
       state: null,
@@ -23,7 +29,7 @@ function createBrowser(href) {
     popstate() {
       for (const listener of listeners) listener()
     },
-  }
+  })
 
   return browser
 }
