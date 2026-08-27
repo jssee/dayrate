@@ -7,7 +7,7 @@ import {
   calculateHourlyRate,
   calculateRawDayRate,
   roundUpDayRate,
-} from './formulas.js'
+} from './formulas.ts'
 
 test('calculates the annual compensation target', () => {
   assert.equal(calculateAnnualCompensation(100_000, 0.01, 0.2), 121_000)

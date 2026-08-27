@@ -5,12 +5,15 @@
     "module": "ESNext",
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
+    "erasableSyntaxOnly": true,
     "resolveJsonModule": true,
     "sourceMap": true,
     "esModuleInterop": true,
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
     "types": ["vite/client", "node"],
-    "skipLibCheck": true,
-    "checkJs": true
+    "skipLibCheck": true
   },
-  "include": ["src/**/*.d.ts", "src/**/*.js", "src/**/*.svelte"]
+  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.svelte", "vite.config.ts"]
 }

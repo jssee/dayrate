@@ -1,25 +1,26 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 
-import { CalculatorUrlState, DEFAULT_CALCULATOR_VALUES } from './calculator-url-state.js'
+import {
+  CalculatorUrlState,
+  DEFAULT_CALCULATOR_VALUES,
+  type CalculatorBrowser,
+} from './calculator-url-state.ts'
 
-/** @typedef {import('./calculator-url-state.js').CalculatorBrowser} CalculatorBrowser */
-
-/**
- * @param {string} href
- * @returns {CalculatorBrowser & { popstate: () => void }}
- */
-function createBrowser(href) {
-  const listeners = /** @type {Set<() => void>} */ (new Set())
-  const browser = /** @type {CalculatorBrowser & { popstate: () => void }} */ ({
-    location: { href },
-    history: {
-      state: null,
-      replaceState(state, _unused, url) {
-        this.state = state
-        browser.location.href = String(url)
-      },
+function createBrowser(href: string): CalculatorBrowser & { popstate(): void } {
+  const listeners = new Set<() => void>()
+  const location = { href }
+  const history: CalculatorBrowser['history'] = {
+    state: null,
+    replaceState(state, _unused, url) {
+      this.state = state
+      location.href = String(url)
     },
+  }
+
+  return {
+    location,
+    history,
     addEventListener(event, listener) {
       if (event === 'popstate') listeners.add(listener)
     },
@@ -29,9 +30,7 @@ function createBrowser(href) {
     popstate() {
       for (const listener of listeners) listener()
     },
-  })
-
-  return browser
+  }
 }
 
 test('reads calculator values from the URL and supplies defaults', () => {

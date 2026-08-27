@@ -1,10 +1,12 @@
-<script>
-  import { calculateDayRate } from './lib/calculator.js'
-  import { CalculatorUrlState } from './lib/calculator-url-state.js'
+<script lang="ts">
+  import { calculateDayRate } from './lib/calculator.ts'
+  import { CalculatorUrlState } from './lib/calculator-url-state.ts'
   import {
     DEFAULT_CALCULATOR_VALUES,
-    validateCalculatorValues,
-  } from './lib/calculator-values.js'
+    InvalidCalculatorValues,
+    type CalculatorErrors,
+    type CalculatorInput,
+  } from './lib/calculator-values.ts'
 
   const urlState = new CalculatorUrlState()
   const money = new Intl.NumberFormat('en-US', {
@@ -19,16 +21,29 @@
     maximumFractionDigits: 2,
   })
 
-  let values = $state(urlState.read())
+  let values: CalculatorInput = $state(urlState.read())
   let assumptionsOpen = $state(false)
   let copyStatus = $state('')
 
-  const errors = $derived(validateCalculatorValues(values))
-  const result = $derived(calculateDayRate(values))
+  const calculation = $derived(calculateDayRate(values))
+  const errors: CalculatorErrors = $derived(
+    calculation.status === 'error' && InvalidCalculatorValues.is(calculation.error)
+      ? calculation.error.fields
+      : {},
+  )
+  const result = $derived(calculation.status === 'ok' ? calculation.value : null)
+  const calculationError = $derived(
+    calculation.status === 'error'
+      ? calculation.error.match({
+          InvalidCalculatorValues: () => 'Correct the invalid fields to calculate a rate.',
+          CalculationOutOfRange: (error) => error.message,
+        })
+      : '',
+  )
   const hasAssumptionErrors = $derived(Object.keys(errors).some((name) => name !== 'salary'))
 
   $effect(() => {
-    if (result) urlState.replace(values)
+    if (calculation.status === 'ok') urlState.replace(values)
   })
 
   $effect(() => {
@@ -93,7 +108,7 @@
           <p>Equivalent to {preciseMoney.format(result.hourlyRate)} per hour.</p>
         {:else}
           <output>—</output>
-          <p>Correct the invalid fields to calculate a rate.</p>
+          <p>{calculationError}</p>
         {/if}
       </div>
       <div class="share">
