@@ -1,19 +1,12 @@
 <script>
+  import { calculateDayRate } from './lib/calculator.js'
   import { CalculatorUrlState } from './lib/calculator-url-state.js'
   import {
     DEFAULT_CALCULATOR_VALUES,
     validateCalculatorValues,
   } from './lib/calculator-values.js'
-  import {
-    calculateAnnualCompensation,
-    calculateBillableDays,
-    calculateHourlyRate,
-    calculateRawDayRate,
-    roundUpDayRate,
-  } from './lib/formulas.js'
 
   const urlState = new CalculatorUrlState()
-  const initialValues = urlState.read()
   const money = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -26,58 +19,26 @@
     maximumFractionDigits: 2,
   })
 
-  let salary = $state(initialValues.salary)
-  let bonus = $state(initialValues.bonus)
-  let benefits = $state(initialValues.benefits)
-  let holidays = $state(initialValues.holidays)
-  let sickDays = $state(initialValues.sickDays)
-  let nonBillable = $state(initialValues.nonBillable)
+  let values = $state(urlState.read())
   let assumptionsOpen = $state(false)
   let copyStatus = $state('')
 
-  const values = $derived({ salary, bonus, benefits, holidays, sickDays, nonBillable })
   const errors = $derived(validateCalculatorValues(values))
-  const inputsAreValid = $derived(Object.keys(errors).length === 0)
-  const hasAssumptionErrors = $derived(
-    Boolean(errors.bonus || errors.benefits || errors.holidays || errors.sickDays || errors.nonBillable),
-  )
-  const annualCompensation = $derived(
-    inputsAreValid ? calculateAnnualCompensation(salary, bonus / 100, benefits / 100) : 0,
-  )
-  const billableDays = $derived(
-    inputsAreValid ? calculateBillableDays(holidays, sickDays, nonBillable / 100) : 0,
-  )
-  const rawDayRate = $derived(
-    inputsAreValid ? calculateRawDayRate(annualCompensation, billableDays) : 0,
-  )
-  const dayRate = $derived(inputsAreValid ? roundUpDayRate(rawDayRate) : 0)
-  const hourlyRate = $derived(inputsAreValid ? calculateHourlyRate(dayRate) : 0)
+  const result = $derived(calculateDayRate(values))
+  const hasAssumptionErrors = $derived(Object.keys(errors).some((name) => name !== 'salary'))
 
   $effect(() => {
-    if (inputsAreValid) urlState.replace(values)
+    if (result) urlState.replace(values)
   })
 
   $effect(() => {
     if (hasAssumptionErrors) assumptionsOpen = true
   })
 
-  $effect(() =>
-    urlState.subscribe((values) => {
-      salary = values.salary
-      bonus = values.bonus
-      benefits = values.benefits
-      holidays = values.holidays
-      sickDays = values.sickDays
-      nonBillable = values.nonBillable
-    }),
-  )
+  $effect(() => urlState.subscribe((nextValues) => (values = nextValues)))
 
   function resetAssumptions() {
-    bonus = DEFAULT_CALCULATOR_VALUES.bonus
-    benefits = DEFAULT_CALCULATOR_VALUES.benefits
-    holidays = DEFAULT_CALCULATOR_VALUES.holidays
-    sickDays = DEFAULT_CALCULATOR_VALUES.sickDays
-    nonBillable = DEFAULT_CALCULATOR_VALUES.nonBillable
+    values = { ...DEFAULT_CALCULATOR_VALUES, salary: values.salary }
   }
 
   async function copyLink() {
@@ -115,7 +76,7 @@
           aria-label="Desired annual salary in dollars"
           aria-invalid={errors.salary ? 'true' : undefined}
           aria-describedby={errors.salary ? 'salary-help salary-error' : 'salary-help'}
-          bind:value={salary}
+          bind:value={values.salary}
         />
       </span>
       <small id="salary-help">Before personal taxes</small>
@@ -125,18 +86,18 @@
     <section class="result" aria-labelledby="result-heading">
       <div>
         <h2 id="result-heading">Suggested day rate</h2>
-        {#if inputsAreValid}
+        {#if result}
           <output for="salary bonus benefits holidays sick-days non-billable">
-            <strong>{money.format(dayRate)}</strong><span> / day</span>
+            <strong>{money.format(result.dayRate)}</strong><span> / day</span>
           </output>
-          <p>Equivalent to {preciseMoney.format(hourlyRate)} per hour.</p>
+          <p>Equivalent to {preciseMoney.format(result.hourlyRate)} per hour.</p>
         {:else}
           <output>—</output>
           <p>Correct the invalid fields to calculate a rate.</p>
         {/if}
       </div>
       <div class="share">
-        <button type="button" class="secondary-button" onclick={copyLink} disabled={!inputsAreValid}>
+        <button type="button" class="secondary-button" onclick={copyLink} disabled={!result}>
           Copy link
         </button>
         <span class="copy-status" role="status">{copyStatus}</span>
@@ -167,7 +128,7 @@
               aria-label="Bonus percentage"
               aria-invalid={errors.bonus ? 'true' : undefined}
               aria-describedby={errors.bonus ? 'bonus-error' : undefined}
-              bind:value={bonus}
+              bind:value={values.bonus}
             />
             <span>%</span>
           </span>
@@ -187,7 +148,7 @@
               aria-label="Benefits percentage"
               aria-invalid={errors.benefits ? 'true' : undefined}
               aria-describedby={errors.benefits ? 'benefits-error' : undefined}
-              bind:value={benefits}
+              bind:value={values.benefits}
             />
             <span>%</span>
           </span>
@@ -207,7 +168,7 @@
               aria-label="Holiday allowance in days"
               aria-invalid={errors.holidays ? 'true' : undefined}
               aria-describedby={errors.holidays ? 'holidays-error' : undefined}
-              bind:value={holidays}
+              bind:value={values.holidays}
             />
             <span>days</span>
           </span>
@@ -227,7 +188,7 @@
               aria-label="Sick or contingency allowance in days"
               aria-invalid={errors.sickDays ? 'true' : undefined}
               aria-describedby={errors.sickDays ? 'sick-days-error' : undefined}
-              bind:value={sickDays}
+              bind:value={values.sickDays}
             />
             <span>days</span>
           </span>
@@ -247,7 +208,7 @@
               aria-label="Non-billable time percentage"
               aria-invalid={errors.nonBillable ? 'true' : undefined}
               aria-describedby={errors.nonBillable ? 'non-billable-error' : undefined}
-              bind:value={nonBillable}
+              bind:value={values.nonBillable}
             />
             <span>%</span>
           </span>
@@ -271,15 +232,15 @@
     <dl>
       <div>
         <dt>Annual compensation target</dt>
-        <dd>{inputsAreValid ? money.format(annualCompensation) : '—'}</dd>
+        <dd>{result ? money.format(result.annualCompensation) : '—'}</dd>
       </div>
       <div>
         <dt>Estimated billable days</dt>
-        <dd>{inputsAreValid ? billableDays.toFixed(1) : '—'}</dd>
+        <dd>{result ? result.billableDays.toFixed(1) : '—'}</dd>
       </div>
       <div>
         <dt>Rate before rounding</dt>
-        <dd>{inputsAreValid ? preciseMoney.format(rawDayRate) : '—'}</dd>
+        <dd>{result ? preciseMoney.format(result.rawDayRate) : '—'}</dd>
       </div>
     </dl>
 
