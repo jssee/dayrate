@@ -4,10 +4,58 @@
     calculateDayRate,
     type CalculatorErrors,
     type CalculatorInput,
+    type CalculatorValueName,
   } from './lib/calculator.ts'
   import { CalculatorUrlState } from './lib/calculator-url-state.ts'
 
+  type AssumptionName = Exclude<CalculatorValueName, 'salary'>
+
+  const assumptionFields = [
+    {
+      name: 'bonus',
+      id: 'bonus',
+      label: 'Bonus',
+      suffix: '%',
+      ariaLabel: 'Bonus percentage',
+    },
+    {
+      name: 'benefits',
+      id: 'benefits',
+      label: 'Benefits',
+      suffix: '%',
+      ariaLabel: 'Benefits percentage',
+    },
+    {
+      name: 'holidays',
+      id: 'holidays',
+      label: 'Holidays',
+      suffix: 'days',
+      ariaLabel: 'Holiday allowance in days',
+    },
+    {
+      name: 'sickDays',
+      id: 'sick-days',
+      label: 'Sick or contingency days',
+      suffix: 'days',
+      ariaLabel: 'Sick or contingency allowance in days',
+    },
+    {
+      name: 'nonBillable',
+      id: 'non-billable',
+      label: 'Non-billable time',
+      suffix: '%',
+      ariaLabel: 'Non-billable time percentage',
+    },
+  ] as const satisfies readonly {
+    name: AssumptionName
+    id: string
+    label: string
+    suffix: string
+    ariaLabel: string
+  }[]
+
   const urlState = new CalculatorUrlState()
+  const initialValues = urlState.read()
   const money = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -20,8 +68,7 @@
     maximumFractionDigits: 2,
   })
 
-  let values: CalculatorInput = $state(urlState.read())
-  let assumptionsOpen = $state(false)
+  let values: CalculatorInput = $state.raw(initialValues)
   let copyStatus = $state('')
 
   const outcome = $derived(calculateDayRate(values))
@@ -34,20 +81,25 @@
         ? 'These values are outside the range that can be calculated reliably.'
         : '',
   )
-  const hasAssumptionErrors = $derived(Object.keys(errors).some((name) => name !== 'salary'))
+  const hasAssumptionErrors = $derived(assumptionFields.some(({ name }) => errors[name]))
 
-  $effect(() => {
+  urlState.replace(initialValues)
+
+  function updateValues(nextValues: CalculatorInput) {
+    values = nextValues
     if (outcome.kind === 'calculated') urlState.replace(outcome.values)
-  })
+  }
 
-  $effect(() => {
-    if (hasAssumptionErrors) assumptionsOpen = true
-  })
+  function updateValue(name: CalculatorValueName, value: number | undefined) {
+    updateValues({ ...values, [name]: value })
+  }
 
-  $effect(() => urlState.subscribe((nextValues) => (values = nextValues)))
+  function handlePopState() {
+    updateValues(urlState.read())
+  }
 
   function resetAssumptions() {
-    values = { ...DEFAULT_CALCULATOR_VALUES, salary: values.salary }
+    updateValues({ ...DEFAULT_CALCULATOR_VALUES, salary: values.salary })
   }
 
   async function copyLink() {
@@ -61,6 +113,8 @@
     setTimeout(() => (copyStatus = ''), 2000)
   }
 </script>
+
+<svelte:window onpopstate={handlePopState} />
 
 <main>
   <header>
@@ -85,7 +139,7 @@
           aria-label="Desired annual salary in dollars"
           aria-invalid={errors.salary ? 'true' : undefined}
           aria-describedby={errors.salary ? 'salary-help salary-error' : 'salary-help'}
-          bind:value={values.salary}
+          bind:value={() => values.salary, (salary) => updateValue('salary', salary)}
         />
       </span>
       <small id="salary-help">Before personal taxes</small>
@@ -113,10 +167,10 @@
       </div>
     </section>
 
-    <details bind:open={assumptionsOpen}>
+    <details>
       <summary>
         <span>Adjust assumptions</span>
-        <small class:error={hasAssumptionErrors}>
+        <small class={{ error: hasAssumptionErrors }}>
           {hasAssumptionErrors
             ? 'Some assumptions need attention.'
             : 'Benefits, time off, and non-billable work'}
@@ -124,107 +178,29 @@
       </summary>
 
       <div class="assumptions">
-        <label for="bonus">
-          <span>Bonus</span>
-          <span class="suffix-input">
-            <input
-              id="bonus"
-              type="number"
-              min="0"
-              step="any"
-              required
-              inputmode="decimal"
-              aria-label="Bonus percentage"
-              aria-invalid={errors.bonus ? 'true' : undefined}
-              aria-describedby={errors.bonus ? 'bonus-error' : undefined}
-              bind:value={values.bonus}
-            />
-            <span>%</span>
-          </span>
-          {#if errors.bonus}<small class="error" id="bonus-error">{errors.bonus}</small>{/if}
-        </label>
-
-        <label for="benefits">
-          <span>Benefits</span>
-          <span class="suffix-input">
-            <input
-              id="benefits"
-              type="number"
-              min="0"
-              step="any"
-              required
-              inputmode="decimal"
-              aria-label="Benefits percentage"
-              aria-invalid={errors.benefits ? 'true' : undefined}
-              aria-describedby={errors.benefits ? 'benefits-error' : undefined}
-              bind:value={values.benefits}
-            />
-            <span>%</span>
-          </span>
-          {#if errors.benefits}<small class="error" id="benefits-error">{errors.benefits}</small>{/if}
-        </label>
-
-        <label for="holidays">
-          <span>Holidays</span>
-          <span class="suffix-input">
-            <input
-              id="holidays"
-              type="number"
-              min="0"
-              step="any"
-              required
-              inputmode="decimal"
-              aria-label="Holiday allowance in days"
-              aria-invalid={errors.holidays ? 'true' : undefined}
-              aria-describedby={errors.holidays ? 'holidays-error' : undefined}
-              bind:value={values.holidays}
-            />
-            <span>days</span>
-          </span>
-          {#if errors.holidays}<small class="error" id="holidays-error">{errors.holidays}</small>{/if}
-        </label>
-
-        <label for="sick-days">
-          <span>Sick or contingency days</span>
-          <span class="suffix-input">
-            <input
-              id="sick-days"
-              type="number"
-              min="0"
-              step="any"
-              required
-              inputmode="decimal"
-              aria-label="Sick or contingency allowance in days"
-              aria-invalid={errors.sickDays ? 'true' : undefined}
-              aria-describedby={errors.sickDays ? 'sick-days-error' : undefined}
-              bind:value={values.sickDays}
-            />
-            <span>days</span>
-          </span>
-          {#if errors.sickDays}<small class="error" id="sick-days-error">{errors.sickDays}</small>{/if}
-        </label>
-
-        <label for="non-billable">
-          <span>Non-billable time</span>
-          <span class="suffix-input">
-            <input
-              id="non-billable"
-              type="number"
-              min="0"
-              step="any"
-              required
-              inputmode="decimal"
-              aria-label="Non-billable time percentage"
-              aria-invalid={errors.nonBillable ? 'true' : undefined}
-              aria-describedby={errors.nonBillable ? 'non-billable-error' : undefined}
-              bind:value={values.nonBillable}
-            />
-            <span>%</span>
-          </span>
-          {#if errors.nonBillable}
-            <small class="error" id="non-billable-error">{errors.nonBillable}</small>
-          {/if}
-        </label>
+        {#each assumptionFields as field (field.name)}
+          <label for={field.id}>
+            <span>{field.label}</span>
+            <span class="suffix-input">
+              <input
+                id={field.id}
+                type="number"
+                min="0"
+                step="any"
+                required
+                inputmode="decimal"
+                aria-label={field.ariaLabel}
+                aria-invalid={errors[field.name] ? 'true' : undefined}
+                aria-describedby={errors[field.name] ? `${field.id}-error` : undefined}
+                bind:value={() => values[field.name], (value) => updateValue(field.name, value)}
+              />
+              <span>{field.suffix}</span>
+            </span>
+            {#if errors[field.name]}
+              <small class="error" id={`${field.id}-error`}>{errors[field.name]}</small>
+            {/if}
+          </label>
+        {/each}
       </div>
 
       <button type="button" class="text-button" onclick={resetAssumptions}>Reset assumptions</button>

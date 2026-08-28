@@ -11,8 +11,6 @@ export { DEFAULT_CALCULATOR_VALUES } from './calculator.ts'
 export interface CalculatorBrowser {
   location: { href: string }
   replaceUrl(url: URL): void
-  addEventListener(type: 'popstate', listener: () => void): void
-  removeEventListener(type: 'popstate', listener: () => void): void
 }
 
 function createDefaultBrowser(): CalculatorBrowser {
@@ -20,12 +18,6 @@ function createDefaultBrowser(): CalculatorBrowser {
     location: window.location,
     replaceUrl(url) {
       window.history.replaceState(window.history.state, '', url)
-    },
-    addEventListener(type, listener) {
-      window.addEventListener(type, listener)
-    },
-    removeEventListener(type, listener) {
-      window.removeEventListener(type, listener)
     },
   }
 }
@@ -67,12 +59,5 @@ export class CalculatorUrlState {
     }
 
     this.browser.replaceUrl(url)
-  }
-
-  subscribe(listener: (values: CalculatorValues) => void): () => void {
-    const handlePopState = () => listener(this.read())
-
-    this.browser.addEventListener('popstate', handlePopState)
-    return () => this.browser.removeEventListener('popstate', handlePopState)
   }
 }

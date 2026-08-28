@@ -7,23 +7,13 @@ import {
   type CalculatorBrowser,
 } from './calculator-url-state.ts'
 
-function createBrowser(href: string): CalculatorBrowser & { popstate(): void } {
-  const listeners = new Set<() => void>()
+function createBrowser(href: string): CalculatorBrowser {
   const location = { href }
 
   return {
     location,
     replaceUrl(url) {
       location.href = String(url)
-    },
-    addEventListener(event, listener) {
-      if (event === 'popstate') listeners.add(listener)
-    },
-    removeEventListener(event, listener) {
-      if (event === 'popstate') listeners.delete(listener)
-    },
-    popstate() {
-      for (const listener of listeners) listener()
     },
   }
 }
@@ -69,20 +59,4 @@ test('writes only supplied calculator values while preserving unrelated URL stat
     browser.location.href,
     'https://example.com/calculator?ref=friend&salary=100000&bonus=3#result',
   )
-})
-
-test('notifies subscribers when browser history changes', () => {
-  const browser = createBrowser('https://example.com/?salary=100000')
-  const state = new CalculatorUrlState(browser)
-  let salary = 0
-  const unsubscribe = state.subscribe((values) => (salary = values.salary))
-
-  browser.location.href = 'https://example.com/?salary=120000'
-  browser.popstate()
-  assert.equal(salary, 120_000)
-
-  unsubscribe()
-  browser.location.href = 'https://example.com/?salary=140000'
-  browser.popstate()
-  assert.equal(salary, 120_000)
 })
