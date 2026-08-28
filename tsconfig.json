@@ -15,5 +15,11 @@
     "types": ["vite/client", "node"],
     "skipLibCheck": true
   },
-  "include": ["src/**/*.d.ts", "src/**/*.ts", "src/**/*.svelte", "vite.config.ts"]
+  "include": [
+    "src/**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.svelte",
+    "oxlint.config.ts",
+    "vite.config.ts"
+  ]
 }

@@ -7,12 +7,15 @@
     "dev": "vite",
     "build": "vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
+    "lint": "oxlint",
     "test": "node --test",
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@oxlint/plugins": "^1.80.0",
     "@sveltejs/vite-plugin-svelte": "^7.2.0",
     "@types/node": "^26.4.0",
+    "oxlint": "^1.80.0",
     "svelte": "^5.56.8",
     "svelte-check": "^4.7.6",
     "typescript": "^6.0.3",
