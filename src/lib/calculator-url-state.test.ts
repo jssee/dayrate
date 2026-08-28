@@ -53,28 +53,22 @@ test('treats blank URL values as missing rather than zero', () => {
   const state = new CalculatorUrlState(browser)
 
   assert.deepEqual(state.read(), DEFAULT_CALCULATOR_VALUES)
-  assert.equal(state.replace(state.read()), true)
+  state.replace(state.read())
   assert.equal(browser.location.href, 'https://example.com/')
 })
 
-test('writes non-default values without removing unrelated parameters or the hash', () => {
-  const browser = createBrowser('https://example.com/calculator?ref=friend&benefits=25#result')
+test('writes only supplied calculator values while preserving unrelated URL state', () => {
+  const browser = createBrowser(
+    'https://example.com/calculator?ref=friend&benefits=25&nonBillable=50#result',
+  )
   const state = new CalculatorUrlState(browser)
 
-  state.replace({ salary: 100_000, bonus: 3 })
+  state.replace({ ...DEFAULT_CALCULATOR_VALUES, salary: 100_000, bonus: 3 })
 
   assert.equal(
     browser.location.href,
-    'https://example.com/calculator?ref=friend&benefits=25&salary=100000&bonus=3#result',
+    'https://example.com/calculator?ref=friend&salary=100000&bonus=3#result',
   )
-})
-
-test('does not write invalid calculator state', () => {
-  const browser = createBrowser('https://example.com/?salary=100000')
-  const state = new CalculatorUrlState(browser)
-
-  assert.equal(state.replace({ nonBillable: 100 }), false)
-  assert.equal(browser.location.href, 'https://example.com/?salary=100000')
 })
 
 test('notifies subscribers when browser history changes', () => {

@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { calculateDayRate } from './lib/calculator.ts'
-  import { CalculatorUrlState } from './lib/calculator-url-state.ts'
   import {
     DEFAULT_CALCULATOR_VALUES,
-    InvalidCalculatorValues,
+    calculateDayRate,
     type CalculatorErrors,
     type CalculatorInput,
-  } from './lib/calculator-values.ts'
+  } from './lib/calculator.ts'
+  import { CalculatorUrlState } from './lib/calculator-url-state.ts'
 
   const urlState = new CalculatorUrlState()
   const money = new Intl.NumberFormat('en-US', {
@@ -25,25 +24,20 @@
   let assumptionsOpen = $state(false)
   let copyStatus = $state('')
 
-  const calculation = $derived(calculateDayRate(values))
-  const errors: CalculatorErrors = $derived(
-    calculation.status === 'error' && InvalidCalculatorValues.is(calculation.error)
-      ? calculation.error.fields
-      : {},
-  )
-  const result = $derived(calculation.status === 'ok' ? calculation.value : null)
+  const outcome = $derived(calculateDayRate(values))
+  const errors: CalculatorErrors = $derived(outcome.kind === 'invalid' ? outcome.fields : {})
+  const result = $derived(outcome.kind === 'calculated' ? outcome.breakdown : null)
   const calculationError = $derived(
-    calculation.status === 'error'
-      ? calculation.error.match({
-          InvalidCalculatorValues: () => 'Correct the invalid fields to calculate a rate.',
-          CalculationOutOfRange: (error) => error.message,
-        })
-      : '',
+    outcome.kind === 'invalid'
+      ? 'Correct the invalid fields to calculate a rate.'
+      : outcome.kind === 'out-of-range'
+        ? 'These values are outside the range that can be calculated reliably.'
+        : '',
   )
   const hasAssumptionErrors = $derived(Object.keys(errors).some((name) => name !== 'salary'))
 
   $effect(() => {
-    if (calculation.status === 'ok') urlState.replace(values)
+    if (outcome.kind === 'calculated') urlState.replace(outcome.values)
   })
 
   $effect(() => {

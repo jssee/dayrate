@@ -2,12 +2,11 @@ import {
   CALCULATOR_VALUE_NAMES,
   DEFAULT_CALCULATOR_VALUES,
   normalizeCalculatorValues,
-  validateCalculatorValues,
   type CalculatorInput,
   type CalculatorValues,
-} from './calculator-values.ts'
+} from './calculator.ts'
 
-export { DEFAULT_CALCULATOR_VALUES } from './calculator-values.ts'
+export { DEFAULT_CALCULATOR_VALUES } from './calculator.ts'
 
 export interface CalculatorBrowser {
   location: { href: string }
@@ -54,14 +53,11 @@ export class CalculatorUrlState {
     return normalizeCalculatorValues(values)
   }
 
-  replace(values: CalculatorInput): boolean {
+  replace(values: CalculatorValues): void {
     const url = new URL(this.browser.location.href)
-    const validation = validateCalculatorValues({ ...this.read(), ...values })
-
-    if (validation.status === 'error') return false
 
     for (const name of CALCULATOR_VALUE_NAMES) {
-      const value = validation.value[name]
+      const value = values[name]
 
       if (value === DEFAULT_CALCULATOR_VALUES[name]) {
         url.searchParams.delete(name)
@@ -71,7 +67,6 @@ export class CalculatorUrlState {
     }
 
     this.browser.replaceUrl(url)
-    return true
   }
 
   subscribe(listener: (values: CalculatorValues) => void): () => void {
