@@ -10,17 +10,12 @@ import {
 function createBrowser(href: string): CalculatorBrowser & { popstate(): void } {
   const listeners = new Set<() => void>()
   const location = { href }
-  const history: CalculatorBrowser['history'] = {
-    state: null,
-    replaceState(state, _unused, url) {
-      this.state = state
-      location.href = String(url)
-    },
-  }
 
   return {
     location,
-    history,
+    replaceUrl(url) {
+      location.href = String(url)
+    },
     addEventListener(event, listener) {
       if (event === 'popstate') listeners.add(listener)
     },

@@ -12,16 +12,28 @@ export { DEFAULT_CALCULATOR_VALUES } from './calculator-values.ts'
 
 export interface CalculatorBrowser {
   location: { href: string }
-  history: {
-    state: unknown
-    replaceState(state: unknown, unused: string, url?: string | URL | null): void
-  }
+  replaceUrl(url: URL): void
   addEventListener(type: 'popstate', listener: () => void): void
   removeEventListener(type: 'popstate', listener: () => void): void
 }
 
-function parseValue(name: CalculatorValueName, value: string | number | undefined): number {
-  if (typeof value === 'string' && value.trim() === '') return DEFAULT_CALCULATOR_VALUES[name]
+function createDefaultBrowser(): CalculatorBrowser {
+  return {
+    location: window.location,
+    replaceUrl(url) {
+      window.history.replaceState(window.history.state, '', url)
+    },
+    addEventListener(type, listener) {
+      window.addEventListener(type, listener)
+    },
+    removeEventListener(type, listener) {
+      window.removeEventListener(type, listener)
+    },
+  }
+}
+
+function parseValue(name: CalculatorValueName, value: string | undefined): number {
+  if (value?.trim() === '') return DEFAULT_CALCULATOR_VALUES[name]
 
   const number = Number(value)
 
@@ -31,7 +43,7 @@ function parseValue(name: CalculatorValueName, value: string | number | undefine
 export class CalculatorUrlState {
   private readonly browser: CalculatorBrowser
 
-  constructor(browser: CalculatorBrowser = window) {
+  constructor(browser: CalculatorBrowser = createDefaultBrowser()) {
     this.browser = browser
   }
 
@@ -62,7 +74,7 @@ export class CalculatorUrlState {
       }
     }
 
-    this.browser.history.replaceState(this.browser.history.state, '', url)
+    this.browser.replaceUrl(url)
     return true
   }
 
