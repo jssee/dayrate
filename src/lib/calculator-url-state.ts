@@ -4,7 +4,6 @@ import {
   normalizeCalculatorValues,
   validateCalculatorValues,
   type CalculatorInput,
-  type CalculatorValueName,
   type CalculatorValues,
 } from './calculator-values.ts'
 
@@ -32,12 +31,9 @@ function createDefaultBrowser(): CalculatorBrowser {
   }
 }
 
-function parseValue(name: CalculatorValueName, value: string | undefined): number {
-  if (value?.trim() === '') return DEFAULT_CALCULATOR_VALUES[name]
-
-  const number = Number(value)
-
-  return Number.isFinite(number) ? number : DEFAULT_CALCULATOR_VALUES[name]
+function parseUrlNumber(value: string | null): number | undefined {
+  const trimmed = value?.trim()
+  return trimmed ? Number(trimmed) : undefined
 }
 
 export class CalculatorUrlState {
@@ -49,10 +45,10 @@ export class CalculatorUrlState {
 
   read(): CalculatorValues {
     const params = new URL(this.browser.location.href).searchParams
-    const values: CalculatorValues = { ...DEFAULT_CALCULATOR_VALUES }
+    const values: CalculatorInput = {}
 
     for (const name of CALCULATOR_VALUE_NAMES) {
-      if (params.has(name)) values[name] = parseValue(name, params.get(name) ?? undefined)
+      values[name] = parseUrlNumber(params.get(name))
     }
 
     return normalizeCalculatorValues(values)

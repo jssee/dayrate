@@ -48,6 +48,7 @@ test('reports every missing, negative, and out-of-range field', () => {
 test('associates the combined day limit with both fields', () => {
   const result = validateCalculatorValues({
     ...DEFAULT_CALCULATOR_VALUES,
+    salary: undefined,
     holidays: 254,
     sickDays: 7,
   })
@@ -55,6 +56,7 @@ test('associates the combined day limit with both fields', () => {
   assert.equal(result.status, 'error')
   if (result.status === 'error') {
     assert.deepEqual(result.error.fields, {
+      salary: 'Enter a number.',
       holidays: 'Holidays and sick days must total fewer than 261 days.',
       sickDays: 'Holidays and sick days must total fewer than 261 days.',
     })

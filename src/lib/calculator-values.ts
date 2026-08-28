@@ -1,35 +1,66 @@
 import { Result, TaggedError, type Result as ResultType } from 'better-result'
+import * as v from 'valibot'
 
 import { WORKING_DAYS_PER_YEAR } from './formulas.ts'
 
-export interface CalculatorValues {
-  salary: number
-  bonus: number
-  benefits: number
-  holidays: number
-  sickDays: number
-  nonBillable: number
-}
+const DEFAULT_VALUES = {
+  salary: 0,
+  bonus: 1,
+  benefits: 20,
+  holidays: 9,
+  sickDays: 7,
+  nonBillable: 20,
+} as const
 
-export interface CalculatorInput {
-  salary?: number | undefined
-  bonus?: number | undefined
-  benefits?: number | undefined
-  holidays?: number | undefined
-  sickDays?: number | undefined
-  nonBillable?: number | undefined
-}
+const NUMBER_MESSAGE = 'Enter a number.'
+const NONNEGATIVE_MESSAGE = 'Enter 0 or greater.'
+const NON_BILLABLE_MESSAGE = 'Enter a percentage below 100.'
+const AVAILABLE_DAYS_MESSAGE = `Holidays and sick days must total fewer than ${WORKING_DAYS_PER_YEAR} days.`
 
-export interface CalculatorErrors {
-  salary?: string
-  bonus?: string
-  benefits?: string
-  holidays?: string
-  sickDays?: string
-  nonBillable?: string
+const nonnegativeNumberSchema = v.pipe(
+  v.number(NUMBER_MESSAGE),
+  v.finite(NUMBER_MESSAGE),
+  v.minValue(0, NONNEGATIVE_MESSAGE),
+)
+const nonBillableSchema = v.pipe(
+  nonnegativeNumberSchema,
+  v.check((value) => value < 100, NON_BILLABLE_MESSAGE),
+)
+const calculatorFields = {
+  salary: nonnegativeNumberSchema,
+  bonus: nonnegativeNumberSchema,
+  benefits: nonnegativeNumberSchema,
+  holidays: nonnegativeNumberSchema,
+  sickDays: nonnegativeNumberSchema,
+  nonBillable: nonBillableSchema,
 }
+const calculatorValuesObjectSchema = v.object(calculatorFields)
+
+export type CalculatorValues = v.InferOutput<typeof calculatorValuesObjectSchema>
+
+const calculatorValuesSchema = v.pipe(
+  calculatorValuesObjectSchema,
+  v.partialCheck(
+    [['holidays'], ['sickDays']],
+    (values) => values.holidays + values.sickDays < WORKING_DAYS_PER_YEAR,
+    AVAILABLE_DAYS_MESSAGE,
+  ),
+)
+const calculatorValuesWithDefaultsSchema = v.fallback(
+  v.object({
+    salary: v.fallback(calculatorFields.salary, DEFAULT_VALUES.salary),
+    bonus: v.fallback(calculatorFields.bonus, DEFAULT_VALUES.bonus),
+    benefits: v.fallback(calculatorFields.benefits, DEFAULT_VALUES.benefits),
+    holidays: v.fallback(calculatorFields.holidays, DEFAULT_VALUES.holidays),
+    sickDays: v.fallback(calculatorFields.sickDays, DEFAULT_VALUES.sickDays),
+    nonBillable: v.fallback(calculatorFields.nonBillable, DEFAULT_VALUES.nonBillable),
+  }),
+  DEFAULT_VALUES,
+)
 
 export type CalculatorValueName = keyof CalculatorValues
+export type CalculatorInput = Partial<CalculatorValues>
+export type CalculatorErrors = Partial<Record<CalculatorValueName, string>>
 
 export const CALCULATOR_VALUE_NAMES = [
   'salary',
@@ -40,49 +71,18 @@ export const CALCULATOR_VALUE_NAMES = [
   'nonBillable',
 ] as const satisfies readonly CalculatorValueName[]
 
-export const DEFAULT_CALCULATOR_VALUES = Object.freeze({
-  salary: 0,
-  bonus: 1,
-  benefits: 20,
-  holidays: 9,
-  sickDays: 7,
-  nonBillable: 20,
-} satisfies CalculatorValues)
+export const DEFAULT_CALCULATOR_VALUES = Object.freeze(DEFAULT_VALUES)
 
 export class InvalidCalculatorValues extends TaggedError('InvalidCalculatorValues')<{
   fields: CalculatorErrors
   message: string
 }> {}
 
-type ScalarValidation =
-  | { status: 'valid'; value: number }
-  | { status: 'invalid'; message: string }
-
-function validateScalarValue(
-  name: CalculatorValueName,
-  value: number | undefined,
-): ScalarValidation {
-  if (value === undefined || !Number.isFinite(value)) {
-    return { status: 'invalid', message: 'Enter a number.' }
-  }
-  if (value < 0) return { status: 'invalid', message: 'Enter 0 or greater.' }
-  if (name === 'nonBillable' && value >= 100) {
-    return { status: 'invalid', message: 'Enter a percentage below 100.' }
-  }
-
-  return { status: 'valid', value }
-}
-
 /**
- * Replace invalid scalar values first, then enforce invariants involving multiple fields.
+ * Default malformed values independently, then restore the paired day assumptions together.
  */
 export function normalizeCalculatorValues(values: CalculatorInput): CalculatorValues {
-  const normalized = { ...DEFAULT_CALCULATOR_VALUES } satisfies CalculatorValues
-
-  for (const name of CALCULATOR_VALUE_NAMES) {
-    const scalar = validateScalarValue(name, values[name])
-    if (scalar.status === 'valid') normalized[name] = scalar.value
-  }
+  const normalized = { ...v.parse(calculatorValuesWithDefaultsSchema, values) }
 
   if (normalized.holidays + normalized.sickDays >= WORKING_DAYS_PER_YEAR) {
     normalized.holidays = DEFAULT_CALCULATOR_VALUES.holidays
@@ -95,34 +95,25 @@ export function normalizeCalculatorValues(values: CalculatorInput): CalculatorVa
 export function validateCalculatorValues(
   values: CalculatorInput,
 ): ResultType<CalculatorValues, InvalidCalculatorValues> {
+  const parsed = v.safeParse(calculatorValuesSchema, values)
+  if (parsed.success) return Result.ok(parsed.output)
+
+  const flattened = v.flatten(parsed.issues)
+  const nested = flattened.nested
   const fields: CalculatorErrors = {}
-  const validated = { ...DEFAULT_CALCULATOR_VALUES } satisfies CalculatorValues
 
   for (const name of CALCULATOR_VALUE_NAMES) {
-    const scalar = validateScalarValue(name, values[name])
-
-    if (scalar.status === 'invalid') {
-      fields[name] = scalar.message
-    } else {
-      validated[name] = scalar.value
-    }
+    const message = nested?.[name]?.[0]
+    if (message) fields[name] = message
   }
 
-  if (
-    !fields.holidays &&
-    !fields.sickDays &&
-    validated.holidays + validated.sickDays >= WORKING_DAYS_PER_YEAR
-  ) {
-    const message = `Holidays and sick days must total fewer than ${WORKING_DAYS_PER_YEAR} days.`
-    fields.holidays = message
-    fields.sickDays = message
+  const availableDaysMessage = flattened.root?.[0]
+  if (availableDaysMessage) {
+    fields.holidays = availableDaysMessage
+    fields.sickDays = availableDaysMessage
   }
 
-  if (Object.keys(fields).length > 0) {
-    return Result.err(
-      new InvalidCalculatorValues({ fields, message: 'Some calculator values are invalid.' }),
-    )
-  }
-
-  return Result.ok(validated)
+  return Result.err(
+    new InvalidCalculatorValues({ fields, message: 'Some calculator values are invalid.' }),
+  )
 }
